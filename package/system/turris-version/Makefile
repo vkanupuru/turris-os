@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=turris-version
-PKG_VERSION:=3.10.2
+PKG_VERSION:=3.10.5
 
 PKG_MAINTAINER:=CZ.NIC <packaging@nic.cz>
 
@@ -28,17 +28,15 @@ define Package/turris-version/postinst
 #!/bin/sh
 # Danger: spaces are not ordinary spaces, but special unicode ones
 [ -n "$$IPKG_INSTROOT" ] || {
-create_notification -s news " • haas: oprava integrace do firewallu
- • ucollect: robustnější start
- • updater: oprava kolizí při upgrade ze starých verzí
- • dvbsky: oprava kompilace ovladače
- • nut: oprava aktualizace
- • kernel, nextcloud: aktualizace" " • haas: fix firewall integration
- • ucollect: more robust start
- • updater: fix collisions when updating from old versions
- • dvbsky: fix driver compilation
- • nut: fix update
- • kernel, nextcloud: update"
+create_notification -s news " • kernel, odhcpv6, twisted, openssh: aktualizace
+ • ca-certificates: přídán balíček pro balík certifikátů
+ • base: zapnuto TCP fast open
+ • haas-proxy: jistější omezení využití CPU
+ • odhcpv6: vypnuta podpora unicastu (způsobovalo problémy v některých sítích), lze zapnout v /etc/config/network" " • kernel, odhcpv6, twisted, openssh: update
+ • ca-certificates: package for ca bundle
+ • base: enable TCP fast open
+ • haas-proxy: more robust CPU usage limits
+ • odhcpv6: disable unicast support (caused problems in some networks), can be enabled in /etc/config/network"
 }
 endef
 

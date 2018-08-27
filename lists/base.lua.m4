@@ -19,6 +19,7 @@ Package('nuci', { replan = replan_str('finished', false) })
 Install("base-files", "busybox", { critical = true })
 Package("kernel", { reboot = "delayed" })
 Package("kmod-mac80211", { reboot = "delayed" })
+Package("wpad", { reboot = "delayed" })
 forInstallCritical(kmod,file2args(kmod.list))
 forInstallCritical(kmod,file2args(kmod-_BOARD_.list))
 Install("fstools", { critical = true })
@@ -80,7 +81,7 @@ else
 	Install("rainbow", { priority = 40 })
 end
 
-Install("foris", "foris-diagnostics-plugin", { priority = 40 })
+Install("foris", "foris-diagnostics-plugin", "turris-webapps", { priority = 40 })
 Install('userlists', { priority = 40 })
 if for_l10n then
 	for_l10n("foris-l10n-")

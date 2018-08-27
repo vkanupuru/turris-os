@@ -39,6 +39,7 @@ define Package/odhcp6c
   SECTION:=net
   CATEGORY:=Network
   TITLE:=Embedded DHCPv6-client for OpenWrt
+  PROVIDES:=dhcpv6-client
   DEPENDS:=@IPV6 +libubox
 endef
 

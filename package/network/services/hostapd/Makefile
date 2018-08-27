@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 
 PKG_SOURCE_URL:=http://w1.fi/hostap.git
 PKG_SOURCE_PROTO:=git
@@ -370,17 +370,14 @@ ifneq ($(LOCAL_TYPE),supplicant)
   endef
 endif
 
-define Package/wpad/preinst
-#!/bin/sh
-if [ -z "$${IPKG_INSTROOT}" ]; then
-       /sbin/wifi down
-fi
-endef
-
 define Package/wpad/postinst
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
-       /sbin/wifi up
+    /sbin/wifi down
+    sleep 2
+    for i in /var/run/wifi-phy*.pid; do kill `cat $$i 2> /dev/null` 2> /dev/null; done
+    sleep 2
+    /sbin/wifi up
 fi
 endef
 

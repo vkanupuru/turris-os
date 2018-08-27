@@ -17,7 +17,7 @@ proto_dhcpv6_init_config() {
 	proto_config_add_string 'extendprefix:bool'
 	proto_config_add_string 'norelease:bool'
 	proto_config_add_string 'noserverunicast:bool'
-	proto_config_add_array 'ip6prefix:list(ip6addr)'
+	proto_config_add_string 'ip6prefix:list(ip6addr)'
 	proto_config_add_string iface_dslite
 	proto_config_add_string zone_dslite
 	proto_config_add_string encaplimit_dslite
@@ -51,9 +51,13 @@ proto_dhcpv6_setup() {
 	local config="$1"
 	local iface="$2"
 
-	local reqaddress reqprefix clientid reqopts defaultreqopts noslaaconly forceprefix extendprefix norelease noserverunicast ip6prefix ip6prefixes iface_dslite iface_map iface_464xlat ifaceid userclass vendorclass sendopts delegate zone_dslite zone_map zone_464xlat zone encaplimit_dslite encaplimit_map soltimeout fakeroutes sourcefilter keep_ra_dnslifetime ra_holdoff
-	json_get_vars reqaddress reqprefix clientid reqopts defaultreqopts noslaaconly forceprefix extendprefix norelease noserverunicast iface_dslite iface_map iface_464xlat ifaceid userclass vendorclass delegate zone_dslite zone_map zone_464xlat zone encaplimit_dslite encaplimit_map soltimeout fakeroutes sourcefilter keep_ra_dnslifetime ra_holdoff
-	json_for_each_item proto_dhcpv6_add_prefix ip6prefix ip6prefixes
+	local reqaddress reqprefix clientid reqopts defaultreqopts noslaaconly forceprefix extendprefix norelease noserverunicast ip6prefix ip6prefixes iface_dslite iface_map iface_464xlat ifaceid userclass vendorclass sendopts delegate zone_dslite zone_map zone_464xlat zone encaplimit_dslite encaplimit_map soltimeout fakeroutes sourcefilter keep_ra_dnslifetime ra_holdoff send_fqdn
+	json_get_vars reqaddress reqprefix clientid reqopts defaultreqopts noslaaconly forceprefix extendprefix norelease noserverunicast ip6prefix iface_dslite iface_map iface_464xlat ifaceid userclass vendorclass sendopts delegate zone_dslite zone_map zone_464xlat zone encaplimit_dslite encaplimit_map soltimeout fakeroutes sourcefilter keep_ra_dnslifetime ra_holdoff send_fqdn
+	#json_for_each_item proto_dhcpv6_add_prefix ip6prefix ip6prefixes
+	for prefix in $ip6prefix; do
+		# proto_dhcpv6_add_prefix $prefix "dummy" $ip6prefixes
+		append ip6prefixes $prefix
+	done
 
 	# Configure
 	local opts=""
@@ -128,4 +132,3 @@ proto_dhcpv6_teardown() {
 }
 
 add_protocol dhcpv6
-
