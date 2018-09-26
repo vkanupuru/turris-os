@@ -382,3 +382,6 @@ CONFIG_PACKAGE_shadowsocks-libev-openssl=y
 CONFIG_PACKAGE_shadowsocks-libev-ss-rules=y
 CONFIG_PACKAGE_shadowsocks-libev-config=y
 CONFIG_PACKAGE_shadowsocks-client=y
+
+# nut
+CONFIG_PACKAGE_luci-app-nut=y
