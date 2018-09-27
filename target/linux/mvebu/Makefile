@@ -11,7 +11,7 @@ BOARD:=mvebu
 BOARDNAME:=Marvell Armada 37x/38x/XP
 FEATURES:=usb pci pcie gpio nand squashfs
 CPU_TYPE:=cortex-a9
-CPU_SUBTYPE:=vfpv3
+CPU_SUBTYPE:=neon
 MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
 
 #KERNEL_PATCHVER:=3.18
