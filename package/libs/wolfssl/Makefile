@@ -159,8 +159,9 @@ define Build/InstallDev
 
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libwolfssl.{so*,la} $(1)/usr/lib/
-	ln -s libwolfssl.so $(1)/usr/lib/libcyassl.so
-	ln -s libwolfssl.la $(1)/usr/lib/libcyassl.la
+	#don't make links to libcyassl for now
+	#ln -s libwolfssl.so $(1)/usr/lib/libcyassl.so
+	#ln -s libwolfssl.la $(1)/usr/lib/libcyassl.la
 
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/*.pc $(1)/usr/lib/pkgconfig
 endef
@@ -168,7 +169,8 @@ endef
 define Package/libwolfssl/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libwolfssl.so* $(1)/usr/lib/
-	ln -s libwolfssl.so $(1)/usr/lib/libcyassl.so
+	#don't make links to libcyassl for now
+	#ln -s libwolfssl.so $(1)/usr/lib/libcyassl.so
 endef
 
 $(eval $(call BuildPackage,libwolfssl))
