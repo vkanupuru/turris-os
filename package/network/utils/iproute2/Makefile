@@ -118,7 +118,6 @@ define Package/ip/install
 	$(INSTALL_DIR) $(1)/etc/iproute2
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/etc/iproute2/rt_tables $(1)/etc/iproute2
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ip/ip $(1)/usr/sbin/
-	$(LN) /usr/sbin/ip $(1)/sbin/ip
 endef
 
 define Package/ip-$(BUILD_VARIANT)/install
@@ -150,7 +149,8 @@ endef
 define Package/ip-full/postinst
 	#!/bin/sh
 	if [ -z "$${IPKG_INSTROOT}" ]; then
-	[ -f /sbin/ip ] && [ -L /sbin/ip  ] && rm /sbin/ip && ln -s /sbin/ip /usr/sbin/ip
+	[ -f /sbin/ip ] && [ -L /sbin/ip  ] && rm /sbin/ip
+	ln -s /usr/sbin/ip /sbin/ip
 	fi
 endef
 
