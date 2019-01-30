@@ -23,6 +23,7 @@ define Host/Compile
 endef
 
 define Host/Install
+	$(INSTALL_DIR) $(STAGING_DIR_HOST)/usr/bin/
 	$(INSTALL_BIN) $(HOST_BUILD_DIR)/ninja $(STAGING_DIR_HOST)/usr/bin/
 endef
 
