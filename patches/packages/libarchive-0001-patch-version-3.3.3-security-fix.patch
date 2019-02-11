@@ -1,41 +1,56 @@
-From eaf44798f180b260ada7f4e78b8fd46d4a20287b Mon Sep 17 00:00:00 2001
+From c999c190085adf8af0246f6f9d324fe681d031a8 Mon Sep 17 00:00:00 2001
 From: Jan Pavlinec <jan.pavlinec@nic.cz>
-Date: Fri, 4 Jan 2019 12:53:58 +0100
-Subject: [PATCH] libarchive: update and patch version 3.3.3 (security fix)
+Date: Mon, 11 Feb 2019 18:06:39 +0100
+Subject: [PATCH] libarchive: patch version 3.3.3 (security fix)
 
-Issue https://gitlab.labs.nic.cz/turris/openwrt/issues/238
+Fixes:
+CVE-2019-1000019
+CVE-2019-1000020
+
+Issue https://gitlab.labs.nic.cz/turris/turris-os-packages/issues/323
 ---
- libs/libarchive/Makefile                           | 52 +++++++++++-----
+ libs/libarchive/Makefile                           | 64 +++++++++++++------
  libs/libarchive/patches/100-CVE-2018-1000880.patch | 37 +++++++++++
  libs/libarchive/patches/101-CVE-2018-1000879.patch | 43 +++++++++++++
  libs/libarchive/patches/102-CVE-2018-1000878.patch | 72 ++++++++++++++++++++++
  libs/libarchive/patches/103-CVE-2018-1000877.patch | 31 ++++++++++
- 5 files changed, 219 insertions(+), 16 deletions(-)
+ libs/libarchive/patches/104-CVE-2019-1000019.patch | 55 +++++++++++++++++
+ libs/libarchive/patches/105-CVE-2019-1000020.patch | 55 +++++++++++++++++
+ 7 files changed, 339 insertions(+), 18 deletions(-)
  create mode 100644 libs/libarchive/patches/100-CVE-2018-1000880.patch
  create mode 100644 libs/libarchive/patches/101-CVE-2018-1000879.patch
  create mode 100644 libs/libarchive/patches/102-CVE-2018-1000878.patch
  create mode 100644 libs/libarchive/patches/103-CVE-2018-1000877.patch
+ create mode 100644 libs/libarchive/patches/104-CVE-2019-1000019.patch
+ create mode 100644 libs/libarchive/patches/105-CVE-2019-1000020.patch
 
 diff --git a/libs/libarchive/Makefile b/libs/libarchive/Makefile
-index 9c42aad..80061ec 100644
+index 9c42aad..d5dee8a 100644
 --- a/libs/libarchive/Makefile
 +++ b/libs/libarchive/Makefile
-@@ -8,12 +8,12 @@
+@@ -8,51 +8,72 @@
  include $(TOPDIR)/rules.mk
  
  PKG_NAME:=libarchive
 -PKG_VERSION:=3.1.2
+-PKG_RELEASE:=1
 +PKG_VERSION:=3.3.3
- PKG_RELEASE:=1
++PKG_RELEASE:=2
  
  PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
- PKG_SOURCE_URL:=http://www.libarchive.org/downloads
+-PKG_SOURCE_URL:=http://www.libarchive.org/downloads
 -PKG_MD5SUM:=efad5a503f66329bb9d2f4308b5de98a
-+#PKG_HASH:=ed2dbd6954792b2c054ccf8ec4b330a54b85904a80cef477a1c74643ddafa0ce
++PKG_SOURCE_URL:=https://www.libarchive.org/downloads
++PKG_HASH:=ba7eb1781c9fbbae178c4c6bad1c6eb08edab9a1496c64833d1715d022b30e2e
++
  PKG_MAINTAINER:=Johannes Morgenroth <morgenroth@ibr.cs.tu-bs.de>
  PKG_LICENSE:=BSD-2-Clause
++PKG_LICENSE_FILES:=COPYING
++PKG_CPE_ID:=cpe:/a:libarchive:libarchive
  
-@@ -22,37 +22,50 @@ PKG_FIXUP:=autoreconf
++PKG_BUILD_PARALLEL:=1
+ PKG_INSTALL:=1
+ PKG_FIXUP:=autoreconf
  
  include $(INCLUDE_DIR)/package.mk
  
@@ -46,7 +61,8 @@ index 9c42aad..80061ec 100644
 -	DEPENDS:=+zlib
 +	DEPENDS:=+zlib +liblzma +libbz2 +libexpat
  	TITLE:=Multi-format archive and compression library
- 	URL:=http://www.libarchive.org/
+-	URL:=http://www.libarchive.org/
++	URL:=https://www.libarchive.org/
  endef
  
 -define Package/$(PKG_NAME)
@@ -81,25 +97,28 @@ index 9c42aad..80061ec 100644
 +endef
 +
  CONFIGURE_ARGS += \
++	--enable-bsdtar=shared \
  	--disable-bsdcpio \
 -	--disable-bsdtar \
-+	--enable-bsdtar=shared \
++	--disable-rpath \
  	--disable-acl \
  	--disable-xattr \
 -	--without-bz2lib \
 -	--without-lzma \
 -	--without-lzmadec \
--	--without-lzo2 \
++	--without-cng \
++	--without-iconv \
++	--without-lz4 \
+ 	--without-lzo2 \
  	--without-nettle \
 -	--without-expat \
 -	--without-xml2
 +	--without-xml2 \
-+	--without-lz4 \
-+	--without-cng \
++	--without-zstd
  
  ifeq ($(BUILD_VARIANT),noopenssl)
  	CONFIGURE_ARGS += --without-openssl
-@@ -71,7 +84,14 @@ define Package/libarchive/install
+@@ -71,7 +92,14 @@ define Package/libarchive/install
  	$(INSTALL_DIR) $(1)/usr/lib
  	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so.* $(1)/usr/lib/
  endef
@@ -322,6 +341,128 @@ index 0000000..7998b55
 +     new_window = realloc(rar->lzss.window, new_size);
 +     if (new_window == NULL) {
 +       archive_set_error(&a->archive, ENOMEM,
+diff --git a/libs/libarchive/patches/104-CVE-2019-1000019.patch b/libs/libarchive/patches/104-CVE-2019-1000019.patch
+new file mode 100644
+index 0000000..a7df5a2
+--- /dev/null
++++ b/libs/libarchive/patches/104-CVE-2019-1000019.patch
+@@ -0,0 +1,55 @@
++From 65a23f5dbee4497064e9bb467f81138a62b0dae1 Mon Sep 17 00:00:00 2001
++From: Daniel Axtens <dja@axtens.net>
++Date: Tue, 1 Jan 2019 16:01:40 +1100
++Subject: [PATCH] 7zip: fix crash when parsing certain archives
++
++Fuzzing with CRCs disabled revealed that a call to get_uncompressed_data()
++would sometimes fail to return at least 'minimum' bytes. This can cause
++the crc32() invocation in header_bytes to read off into invalid memory.
++
++A specially crafted archive can use this to cause a crash.
++
++An ASAN trace is below, but ASAN is not required - an uninstrumented
++binary will also crash.
++
++==7719==ERROR: AddressSanitizer: SEGV on unknown address 0x631000040000 (pc 0x7fbdb3b3ec1d bp 0x7ffe77a51310 sp 0x7ffe77a51150 T0)
++==7719==The signal is caused by a READ memory access.
++    #0 0x7fbdb3b3ec1c in crc32_z (/lib/x86_64-linux-gnu/libz.so.1+0x2c1c)
++    #1 0x84f5eb in header_bytes (/tmp/libarchive/bsdtar+0x84f5eb)
++    #2 0x856156 in read_Header (/tmp/libarchive/bsdtar+0x856156)
++    #3 0x84e134 in slurp_central_directory (/tmp/libarchive/bsdtar+0x84e134)
++    #4 0x849690 in archive_read_format_7zip_read_header (/tmp/libarchive/bsdtar+0x849690)
++    #5 0x5713b7 in _archive_read_next_header2 (/tmp/libarchive/bsdtar+0x5713b7)
++    #6 0x570e63 in _archive_read_next_header (/tmp/libarchive/bsdtar+0x570e63)
++    #7 0x6f08bd in archive_read_next_header (/tmp/libarchive/bsdtar+0x6f08bd)
++    #8 0x52373f in read_archive (/tmp/libarchive/bsdtar+0x52373f)
++    #9 0x5257be in tar_mode_x (/tmp/libarchive/bsdtar+0x5257be)
++    #10 0x51daeb in main (/tmp/libarchive/bsdtar+0x51daeb)
++    #11 0x7fbdb27cab96 in __libc_start_main /build/glibc-OTsEL5/glibc-2.27/csu/../csu/libc-start.c:310
++    #12 0x41dd09 in _start (/tmp/libarchive/bsdtar+0x41dd09)
++
++This was primarly done with afl and FairFuzz. Some early corpus entries
++may have been generated by qsym.
++---
++ libarchive/archive_read_support_format_7zip.c | 8 +-------
++ 1 file changed, 1 insertion(+), 7 deletions(-)
++
++diff --git a/libarchive/archive_read_support_format_7zip.c b/libarchive/archive_read_support_format_7zip.c
++index bccbf8966..b6d1505d3 100644
++--- a/libarchive/archive_read_support_format_7zip.c
+++++ b/libarchive/archive_read_support_format_7zip.c
++@@ -2964,13 +2964,7 @@ get_uncompressed_data(struct archive_read *a, const void **buff, size_t size,
++ 	if (zip->codec == _7Z_COPY && zip->codec2 == (unsigned long)-1) {
++ 		/* Copy mode. */
++ 
++-		/*
++-		 * Note: '1' here is a performance optimization.
++-		 * Recall that the decompression layer returns a count of
++-		 * available bytes; asking for more than that forces the
++-		 * decompressor to combine reads by copying data.
++-		 */
++-		*buff = __archive_read_ahead(a, 1, &bytes_avail);
+++		*buff = __archive_read_ahead(a, minimum, &bytes_avail);
++ 		if (bytes_avail <= 0) {
++ 			archive_set_error(&a->archive,
++ 			    ARCHIVE_ERRNO_FILE_FORMAT,
+diff --git a/libs/libarchive/patches/105-CVE-2019-1000020.patch b/libs/libarchive/patches/105-CVE-2019-1000020.patch
+new file mode 100644
+index 0000000..86bbd9d
+--- /dev/null
++++ b/libs/libarchive/patches/105-CVE-2019-1000020.patch
+@@ -0,0 +1,55 @@
++From 8312eaa576014cd9b965012af51bc1f967b12423 Mon Sep 17 00:00:00 2001
++From: Daniel Axtens <dja@axtens.net>
++Date: Tue, 1 Jan 2019 17:10:49 +1100
++Subject: [PATCH] iso9660: Fail when expected Rockridge extensions is missing
++
++A corrupted or malicious ISO9660 image can cause read_CE() to loop
++forever.
++
++read_CE() calls parse_rockridge(), expecting a Rockridge extension
++to be read. However, parse_rockridge() is structured as a while
++loop starting with a sanity check, and if the sanity check fails
++before the loop has run, the function returns ARCHIVE_OK without
++advancing the position in the file. This causes read_CE() to retry
++indefinitely.
++
++Make parse_rockridge() return ARCHIVE_WARN if it didn't read an
++extension. As someone with no real knowledge of the format, this
++seems more apt than ARCHIVE_FATAL, but both the call-sites escalate
++it to a fatal error immediately anyway.
++
++Found with a combination of AFL, afl-rb (FairFuzz) and qsym.
++---
++ libarchive/archive_read_support_format_iso9660.c | 11 ++++++++++-
++ 1 file changed, 10 insertions(+), 1 deletion(-)
++
++diff --git a/libarchive/archive_read_support_format_iso9660.c b/libarchive/archive_read_support_format_iso9660.c
++index 28acfefbb..bad8f1dfe 100644
++--- a/libarchive/archive_read_support_format_iso9660.c
+++++ b/libarchive/archive_read_support_format_iso9660.c
++@@ -2102,6 +2102,7 @@ parse_rockridge(struct archive_read *a, struct file_info *file,
++     const unsigned char *p, const unsigned char *end)
++ {
++ 	struct iso9660 *iso9660;
+++	int entry_seen = 0;
++ 
++ 	iso9660 = (struct iso9660 *)(a->format->data);
++ 
++@@ -2257,8 +2258,16 @@ parse_rockridge(struct archive_read *a, struct file_info *file,
++ 		}
++ 
++ 		p += p[2];
+++		entry_seen = 1;
+++	}
+++
+++	if (entry_seen)
+++		return (ARCHIVE_OK);
+++	else {
+++		archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
+++				  "Tried to parse Rockridge extensions, but none found");
+++		return (ARCHIVE_WARN);
++ 	}
++-	return (ARCHIVE_OK);
++ }
++ 
++ static int
 -- 
 2.7.4
 
