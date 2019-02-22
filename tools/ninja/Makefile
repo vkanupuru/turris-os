@@ -7,11 +7,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ninja
-PKG_VERSION:=1.8.2
+PKG_VERSION:=1.9.0
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/ninja-build/ninja/tar.gz/v$(PKG_VERSION)?
-PKG_MD5SUM:=86b8700c3d0880c2b44c2ff67ce42774aaf8c28cbf57725cb881569288c1c6f4
+PKG_MD5SUM:=5d7ec75828f8d3fd1a0c2f31b5b0cea780cdfe1031359228c428c1a48bfcd5b9
 
 include $(INCLUDE_DIR)/host-build.mk
 
@@ -29,6 +29,7 @@ endef
 
 define Host/Clean
 	$(call Host/Clean/Default)
+	rm $(STAGING_DIR_HOST)/usr/bin/ninja
 endef
 
 $(eval $(call HostBuild))
