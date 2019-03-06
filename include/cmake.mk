@@ -4,6 +4,7 @@ ifneq ($(findstring c,$(OPENWRT_VERBOSE)),)
   MAKE_FLAGS+=VERBOSE=1
 endif
 
+CMAKE_GENERATOR ?= "Unix Makefiles"
 CMAKE_SOURCE_DIR:=.
 
 ifeq ($(CONFIG_EXTERNAL_TOOLCHAIN),)
@@ -68,6 +69,7 @@ define Build/Configure/Default
 			-DDL_LIBRARY=$(STAGING_DIR) \
 			-DCMAKE_PREFIX_PATH=$(STAGING_DIR) \
 			-DCMAKE_SKIP_RPATH=TRUE  \
+			-G $(CMAKE_GENERATOR) \
 			$(CMAKE_OPTIONS) \
 		$(CMAKE_SOURCE_DIR) \
 	)
