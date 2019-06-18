@@ -359,4 +359,4 @@ CONFIG_OPENSSL_WITH_SSL3=y
 CONFIG_PACKAGE_haveged=y
 
 # New packages
-+CONFIG_PACKAGE_dev-detect=y
+CONFIG_PACKAGE_dev-detect=y
