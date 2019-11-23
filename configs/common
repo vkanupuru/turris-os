@@ -359,4 +359,5 @@ CONFIG_OPENSSL_WITH_SSL3=y
 CONFIG_PACKAGE_haveged=y
 
 # My dev branch
-
+CONFIG_PACKAGE_php7=y
+CONFIG_PACKAGE_php7-cli=y
