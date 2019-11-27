@@ -360,3 +360,5 @@ CONFIG_PACKAGE_haveged=y
 
 # My dev branch
 CONFIG_PACKAGE_christmas=y
+CONFIG_PACKAGE_sentinel-wrapper=y
+
